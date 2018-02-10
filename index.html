@@ -5,24 +5,48 @@
     <script src="dist/web3.min.js"></script>
 
     <script type="text/javascript">
-
-        var contract_address = "0xF204cbe4Ca294482ffE53bb1345404b86df4cbFb";
+        var contract_address = "0xa6a2fd8d083fe4a920b4003cdeb351d8ca985e19";
         var contract_abi = [ { "constant": true, "inputs": [], "name": "getCreator", "outputs": [ { "name": "", "type": "address", "value": "0xd1a5cafa7098f7b74e8369810ba2dfc1cd67d9db" } ], "payable": false, "type": "function" }, { "constant": false, "inputs": [], "name": "kill", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [ { "name": "myNewNumber", "type": "uint256" } ], "name": "setMyNumber", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "getMyNumber", "outputs": [ { "name": "", "type": "uint256", "value": "3" } ], "payable": false, "type": "function" }, { "inputs": [], "payable": false, "type": "constructor" } ];
-
-        if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
-        } else {
-            // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        }
-
+        
+        // set the provider to localhost running geth node
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
         var contract_instance = web3.eth.contract(contract_abi).at(contract_address);
-
         function getCounter() {
             document.getElementById("myCounter").innerText = contract_instance.getMyNumber().toNumber();
         }
 
+        function increaseCounter() {
+        	var currentValue = contract_instance.getMyNumber().toNumber();
+			var txHash;
 
+        	//gotta unlock the account prior to sending a transaction
+        	web3.personal.unlockAccount(web3.eth.accounts[0], "notmypassword");
+        	contract_instance.setMyNumber(currentValue + 1, {from: web3.eth.accounts[0], gas:200000}, function(error, result) {
+        		if(error)
+        			console.error(error);
+        		else
+        			txHash = result;
+        			console.log(txHash);
+        	});
+        	callAfterMined(txHash, getCounter);
+        }
+
+        function callAfterMined(txHash, callback) {
+        	web3.eth.getTransactionReceipt(txHash, function(error, receipt) {
+        		if(error)
+        			console.error(error);
+        		else {
+        			if (txHash == null) {
+        			setTimeout(function() {
+        				callAfterMined(txHash, callback);
+        			}, 500);
+
+        			} else {
+        				callback();
+        			}
+        		}
+        	})
+        }
     </script>
 </head>
 <body>
