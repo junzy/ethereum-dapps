@@ -20,7 +20,7 @@
 			var txHash;
 
         	//gotta unlock the account prior to sending a transaction
-        	web3.personal.unlockAccount(web3.eth.accounts[0], "notmypassword");
+        	web3.personal.unlockAccount(web3.eth.accounts[0], "test1234");
         	contract_instance.setMyNumber(currentValue + 1, {from: web3.eth.accounts[0], gas:200000}, function(error, result) {
         		if(error)
         			console.error(error);
