@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>MetaCoin - Truffle Webpack Demo w/ Frontend</title>
+  <title>MetaCoin - Truffle Webpack w/ Frontend</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <script src="./app.js"></script>
 </head>
@@ -34,11 +34,25 @@
 
          <button type="submit" class="btn btn-default">Submit</button>
        </form>
-
        <br />
        <br />
        <span id="addresses"></span>
      </div>
+   </div>
+   <div>
+     <button type="button" onclick="App.confirmTransaction()">Confirm Latest Proposal</button>
+   </div>
+   <div class="row">
+    <div class="col-lg-6"> 
+      <h3>Proposal received</h3>
+      <div id="proposalEvents">
+      </div>
+    </div>
+    <div class="col-lg-6"> 
+      <h3>Funds received</h3>
+      <div id="fundEvents"></div>
+    </div>
+     
    </div>
  </div>
 </body>

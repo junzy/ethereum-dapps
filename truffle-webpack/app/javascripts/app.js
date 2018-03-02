@@ -44,6 +44,8 @@ window.App = {
       document.getElementById("addresses").innerHTML = accounts.join("<br />");
 
       App.basicInfoUpdate();
+      //listening to events received funds
+      App.listenToEvents();
     });
   },
 
@@ -70,13 +72,45 @@ window.App = {
     var _reason = document.getElementById("reason").value;
 
     MyWallet.deployed().then(function(instance) {
-      return instance.spendMoneyOn(_to, web3.toWei(_amount, 'finney'), _reason, {from:accounts[0]});
+      return instance.spendMoneyOn(_to, web3.toWei(_amount, 'finney'), _reason, {from:accounts[1], gas:500000});
     }).then(function(result) {
       console.log(result);
       App.basicInfoUpdate();
     }).catch(function(err) {
       console.error(err);
     });
+  },
+  listenToEvents: function(){
+    MyWallet.deployed().then(function(instance){
+      instance.receivedFunds({}, {fromBlock:0, toBlock:'latest'}).watch(function(error, event){
+        var contents = "From: " + JSON.stringify(event.args._from);
+        document.getElementById("fundEvents").innerHTML += contents;
+      })
+    })
+    MyWallet.deployed().then(function(instance){
+      instance.proposalReceived({}, {fromBlock:0, toBlock:'latest'}).watch(function(error, event){
+        console.log(event.args);
+        var contents = "<br/><br/> <br/>  From: " + JSON.stringify(event.args._from);
+        contents += "<br/> To: " + JSON.stringify(event.args._to);
+        document.getElementById("proposalEvents").innerHTML += contents;
+      })
+    })
+  },
+
+  //confirms all pending proposals.
+  confirmTransaction: function(){
+    MyWallet.deployed().then(function(instance){
+      instance.proposalReceived({}, {fromBlock:'pending', toBlock:'latest'}).watch(function(error, event){
+        var proposalId = event.args.proposal_id.c[0];
+        console.log(proposalId);
+        return instance.confirmProposal(proposalId, {from: accounts[0]});
+      })
+    }).then(function(result){
+      console.log(result);
+      App.basicInfoUpdate();
+    }).catch(function(error){
+      console.log(error);
+    })
   },
 
   sendCoin: function() {
@@ -93,6 +127,7 @@ window.addEventListener('load', function() {
   } else {
     console.warn("No web3 detected. Falling back to http://localhost:9545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+    // use this if you are using geth or truffles testrpc
     window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:9545"));
   }
 
