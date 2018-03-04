@@ -4,8 +4,7 @@ import "./mortal.sol";
 import "./CVExtender.sol";
 
 contract MyCV is mortal, CVExtender{
-	address public owner;
-
+    
 	struct BasicInfo {
         string _name;           /// Name; First & Last
         string _label;          /// Job Title 
@@ -22,12 +21,14 @@ contract MyCV is mortal, CVExtender{
     }
 
     BasicInfo public basicInfo; 		// Basic Info object 
-    mapping(uint => Experience) m_experiences;			// List of experiences
-    uint experience_counter;		// Experience List counter
+    mapping(uint => Experience) public m_experiences;			// List of experiences
+    uint public experience_counter;		// Experience List counter
 
 
     event basicInfoSet(string _name, string _label, 
     string _email, string _phone, string _website, string _summary);
+
+    event experienceAdded(uint experience_id, string _period, string _title, string _description);
 
     function MyCV () {    	
     setBasicInfo("Junaid Ahmed", "Software Engineer", 
@@ -38,13 +39,18 @@ contract MyCV is mortal, CVExtender{
     function addExperience(string _period, string _title, string _description)  public onlyowner returns (uint) {
     	experience_counter++;
         m_experiences[experience_counter] = Experience(_period, _title, _description);
-        // proposalReceived(msg.sender, _to, _reason, proposal_counter);
+        experienceAdded(experience_counter, _period, _title, _description);
         return experience_counter;
     }
 
-    function getAllExperiences(uint experience_id)  public onlyowner {
-    	if (experience_id <= experience_counter && experience_id > 0)
-    		return m_experiences[experience_id];
+    function getExperience(uint experience_id)  public returns (string _period, string _title, string _description){
+        if (experience_counter == 0)
+            throw;
+        // declares arrays of size experience_counter.
+        string period = m_experiences[experience_id]._period;
+        string title = m_experiences[experience_id]._title;
+        string description = m_experiences[experience_id]._description;
+        return (period, title, description);
     }
     
 	function setBasicInfo (string _name, string _label, 

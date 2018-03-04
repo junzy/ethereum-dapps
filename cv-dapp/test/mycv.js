@@ -35,7 +35,7 @@ contract('MyCV', function(accounts) {
       return contractInstance.getDescription();
     }).then(function(result){
       var description = result;
-      assert.equal(email, "Peace among worlds", "Summary set correctly");
+      assert.equal(description, "Peace among worlds", "Summary set correctly");
     });
   });
 });

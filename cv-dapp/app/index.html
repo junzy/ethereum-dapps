@@ -14,7 +14,28 @@
   <p><span id="summary"></span></p>
   
   <br><br>
-  <span id="status"></span>
+  <form onsubmit="App.addExperience(); return false;">
+    <h3>Add Experience</h3>
+         <div class="form-group">
+           <label for="to">Role</label>
+           <input type="text" class="form-control" id="experience_title" placeholder="Role">
+         </div>
+         <div class="form-group">
+           <label for="amount">Date Period</label>
+           <input type="text" class="form-control" id="experience_date" placeholder="From MM/YYYY To MM/YYYY">
+         </div>
+         <div class="form-group">
+           <label for="reason">Description</label>
+           <input type="text" class="form-control" id="experience_description" placeholder="Describe your role">
+         </div>
+
+         <button type="submit" class="btn btn-default">Submit</button>
+   </form>
+
+   <div id="experience">
+     <h3>Experience</h3> 
+   </div>
+
   <br>
   <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
 </body>

@@ -51,11 +51,50 @@ window.App = {
       document.getElementById("title").innerHTML = title;
       document.getElementById("authorName").innerHTML = authorName;
       document.getElementById("summary").innerHTML = summary;
+    }).catch(function(error){
+      console.error(error);
     })
   },
+
+  showExperiences: function(experience_counter) {
+    if (experience_counter > 0){
+      MyCV.deployed().then(function(instance){
+        return instance.m_experiences(experience_counter, {from: accounts[0], gas:500000});
+    }).then(function(result){
+      console.log(result);
+      document.getElementById("experience").innerHTML += "</br></br>" + result;
+      experience_counter--;
+      App.showExperiences(experience_counter);
+    }).catch(function(error){
+      console.error(error);
+    })
+    }
+  },
+
+  addExperience: function() {
+    MyCV.deployed().then(function(instance){
+      var title = document.getElementById("experience_title").value;
+      var description = document.getElementById("experience_description").value;
+      var period = document.getElementById("experience_date").value;
+      return instance.addExperience(period, title, description, {from: accounts[0], gas:500000})
+    }).then(function(result){
+      console.log(result);
+    }).catch(function(error){
+      console.error(error);
+    })
+  },
+
   initialize: function() {
-    // App.showAuthor();
     App.showBasicInfo();
+    MyCV.deployed().then(function(instance){
+      return instance.experience_counter({from: accounts[0]})
+    }).then(function(result){
+      // get the count of experiences and show them all
+      App.showExperiences(result.c);
+    }).catch(function(error){
+      console.error(error);
+    })
+    
   }
 };
 
