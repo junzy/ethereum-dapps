@@ -1,5 +1,7 @@
 // Import the page's CSS. Webpack will know what to do with it.
 import "../stylesheets/app.css";
+import "bootstrap";
+// import "bootstrap/dist/css/bootstrap.css"
 
 // Import libraries we need.
 import { default as Web3} from 'web3';
@@ -42,6 +44,7 @@ window.App = {
     });
   },
   
+  // displays the contract address, authorname, title and summary
   showBasicInfo: function(){
     MyCV.deployed().then(function(instance){
       document.getElementById("contractAddress").innerHTML = instance.address;
@@ -55,14 +58,16 @@ window.App = {
       console.error(error);
     })
   },
-
+  
+  // Populates the experiences into a div
   showExperiences: function(experience_counter) {
     if (experience_counter > 0){
       MyCV.deployed().then(function(instance){
         return instance.m_experiences(experience_counter, {from: accounts[0], gas:500000});
     }).then(function(result){
       console.log(result);
-      document.getElementById("experience").innerHTML += "</br></br>" + result;
+      var [role, date, description] = result;
+      document.getElementById("experience").innerHTML += "</br></br>" + date + "," + role + "</br>" + description;
       experience_counter--;
       App.showExperiences(experience_counter);
     }).catch(function(error){
@@ -70,7 +75,7 @@ window.App = {
     })
     }
   },
-
+  // adds an experience to the experience mapping
   addExperience: function() {
     MyCV.deployed().then(function(instance){
       var title = document.getElementById("experience_title").value;
@@ -79,6 +84,21 @@ window.App = {
       return instance.addExperience(period, title, description, {from: accounts[0], gas:500000})
     }).then(function(result){
       console.log(result);
+      App.initializeExperiences();
+    }).catch(function(error){
+      console.error(error);
+    })
+  },
+
+  // gets the count of experiences and calls showExperience that many times
+  initializeExperiences: function(){
+    MyCV.deployed().then(function(instance){
+      return instance.experience_counter({from: accounts[0]})
+    }).then(function(result){
+      // clear existing experiences
+      document.getElementById("experience").innerHTML = "";
+      // get the count of experiences and show them all
+      App.showExperiences(result.c);
     }).catch(function(error){
       console.error(error);
     })
@@ -86,26 +106,17 @@ window.App = {
 
   initialize: function() {
     App.showBasicInfo();
-    MyCV.deployed().then(function(instance){
-      return instance.experience_counter({from: accounts[0]})
-    }).then(function(result){
-      // get the count of experiences and show them all
-      App.showExperiences(result.c);
-    }).catch(function(error){
-      console.error(error);
-    })
-    
+    App.initializeExperiences();    
   }
 };
 
 window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof web3 !== 'undefined') {
-    console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
+    console.warn("Using web3 detected from external source. If you find that your name doesn't appear or you have no address displayed, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
     // Use Mist/MetaMask's provider
     window.web3 = new Web3(web3.currentProvider);
   } else {
-    console.warn("No web3 detected. Falling back to http://127.0.0.1:9545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
     window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
   }
